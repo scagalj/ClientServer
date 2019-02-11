@@ -1,25 +1,17 @@
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Executors;
+import java.sql.*;
 
 
 
 
 public class EchoServer {
 	private static int PORT = 9090;
-	public static Set<String> names = new HashSet<>();
-	private static Set<PrintWriter> writers = new HashSet<>();
 	private static ServerSocket server;
 	private static Map<String,PrintWriter> maps = new HashMap<String,PrintWriter>();
 	
@@ -47,9 +39,11 @@ public class EchoServer {
 		Socket soc;
 		BufferedReader in;
 		PrintWriter out;
+		Connection con;
 		
 		private String name;
 		private String toName;
+		
 
 		
 		public Osoba(Socket soc) {
@@ -57,7 +51,7 @@ public class EchoServer {
 			try {
 				in = new BufferedReader(new InputStreamReader(soc.getInputStream()));
 				out = new PrintWriter(soc.getOutputStream(),true);
-				
+				con = makeConnection();
 			}catch(Exception e) {
 				
 			}
@@ -65,15 +59,48 @@ public class EchoServer {
 		
 		public void run() {
 			try {
-				name = in.readLine();
-				toName = in.readLine();
+				String login;
+				login = in.readLine();
+				while(true) {
+					name = in.readLine();
+					if(login.equals("P")) {
+						if(isThere(name) == true) {
+							out.println("SUC");
+							break;
+						}else {
+							out.println("OSOBAFAIL");
+						}
+					}else {
+						if(isThere(name) == false) {
+							addUser(name);
+							out.println("SUC");
+							break;
+						}else {
+							out.println("FAILOSOBA");
+						}
+						
+					}
+			
+				}
+
+				while(true) {
+					toName = in.readLine();
+					if(isThere(toName) == true) {
+						out.println("SUC");
+						break;
+					}else {
+						out.println("FAIL");
+					}
+					
+				}
+				
+				
 				synchronized(maps) {
 					if(!maps.containsKey("name")) {
 						maps.put(name, out);
 					}
 				}
 				out.println("Ime prihvaceno");
-				//writers.add(out);
 				
 				
 				while(true) {
@@ -81,10 +108,6 @@ public class EchoServer {
 					
 					PrintWriter wout = maps.get(toName);
 					wout.println("[" + name + "] " + s);
-					/*for(PrintWriter pw : writers) {
-						pw.println("Poruka od servera za sve" + s );
-					}*/
-					//out.println(s);
 				}
 				
 			}catch(Exception e) {
@@ -93,12 +116,6 @@ public class EchoServer {
 				if(maps.get(name)!= null)
 					maps.remove(name);
 				
-				if(names != null) {
-					names.remove(name);
-				}
-				if(out != null) {
-					writers.remove(out);
-				}
 				try{soc.close();
 				}catch(Exception e) {
 					e.printStackTrace();
@@ -106,20 +123,45 @@ public class EchoServer {
 			}
 		}
 		
+		private Connection makeConnection() throws Exception {
+				Class.forName("com.mysql.jdbc.Driver");
+				String connectionUrl = "jdbc:sqlserver://localhost;database=ClientServer;user=jure;password=jure;";
+				Connection con = DriverManager.getConnection(connectionUrl);
+				return con;
+				
+			}
+		
+
+		private boolean isThere(String name) throws Exception {
+			
+			Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT Korisnik FROM Korisnici");
+			while(rs.next()) {
+				if(rs.getString(1).equals(name)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		
+		private void addUser(String name) throws Exception {
+			PreparedStatement pstmt = null;
+			try{
+				pstmt = con.prepareStatement("insert into Korisnici (Korisnik)" + " values (?)");
+				pstmt.setString (1, name);
+				pstmt.execute();
+			}catch(Exception e) {
+				e.printStackTrace();
+			}finally {
+				if(pstmt != null) {
+					pstmt.close();
+				}
+			}
+		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }
+	
 
 
 
