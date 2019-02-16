@@ -48,16 +48,23 @@ public class Osoba extends Thread{
 					 if(isThere(name) && !isOnline(name)) {
 						 threads.add(name);
 						 out.println("SUC1");
+						 break;
 					 }else {
-						addUser(name);
-						out.println("SUC2");
+						 if(isOnline(name)) {
+							 out.println("FAIL");
+						}else {
+							addUser(name);
+							out.println("SUC2");
+							break;
+						}
+						
 					 }
-					break;
+					
 				 }
 				
 				while(true) {
 					toName = in.readLine();
-					if(isThere(toName)) {
+					if(isThere(toName) && !toName.equals(name)) {
 						out.println("SUC3");
 						break;
 					}else {
@@ -96,7 +103,9 @@ public class Osoba extends Thread{
 			}finally{
 				if(maps.get(name)!= null)
 					maps.remove(name);
-				
+				if(threads.contains(name)) {
+					threads.remove(name);
+				}
 				try{soc.close();
 				}catch(Exception e) {
 					e.printStackTrace();

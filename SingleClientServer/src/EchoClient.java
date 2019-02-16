@@ -30,8 +30,14 @@ public class EchoClient {
 				System.out.println("Unesite ime: ");
 				out.println(scanner.nextLine());
 				String output = in.readLine();
-				System.out.println("Uspiješno ste se logirali kao " + (output.equals("SUC1") ? "postojeæi" : "novi") + " korisnik");
-				break;
+				if(output.equals("FAIL")) {
+					System.out.println("Korisnik je vec ulogiran s imenom");
+				}else {
+					System.out.println("Uspiješno ste se logirali kao " + (output.equals("SUC1") ? "postojeæi" : "novi") + " korisnik");
+					break;
+				}
+				
+				
 			}
 			
 			while(true) {
