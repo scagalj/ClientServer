@@ -25,32 +25,24 @@ public class EchoClient {
 			
 			out = new PrintWriter(socket.getOutputStream(),true);
 			
-			
-			
-			System.out.println("Prijavljujte se kao: (N/P) N-Novi, P-Postojeci");
-			out.println(scanner.nextLine());
-			
-			
-			
+			//Prilikom indentificiranja osobe pomoæu imena i lozinke(uskoro)
 			while(true) {
 				System.out.println("Unesite ime: ");
 				out.println(scanner.nextLine());
-				String n = in.readLine();
-				if(n.equals("SUC")) {
-					break;
-				}else if(n.equals("FAILOSOBA")){
-					System.out.println("Osoba vec postoji");	
-				}else if(n.equals("OSOBAFAIL")) {
-					System.out.println("Osoba ne postoji");
-				}
+				String output = in.readLine();
+				System.out.println("Uspiješno ste se logirali kao " + (output.equals("SUC1") ? "postojeæi" : "novi") + " korisnik");
+				break;
 			}
+			
 			while(true) {
-				System.out.println("Unesite kome saljete: ");
+				System.out.println("Unesite ime kome šaljete: ");
 				out.println(scanner.nextLine());
-				if(in.readLine().equals("SUC")) {
+				String output = in.readLine();
+				if(output.equals("SUC3")) {
+					System.out.println("Uspiješno dodan primatelj");
 					break;
 				}else {
-					System.out.println("Korisnik ne postoji, probajte s drugim imenom");
+					System.out.println("Ime ne postoji");
 				}
 			}
 			
